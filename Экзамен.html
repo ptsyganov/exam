@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Экзамен: Сказки против видеоигр</title>
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState } = React;
+
+        const Card = ({ children, className }) => (
+            <div className={`bg-white shadow-md rounded-lg p-6 ${className}`}>{children}</div>
+        );
+        const CardHeader = ({ children, className }) => (
+            <div className={`text-xl font-bold mb-4 ${className}`}>{children}</div>
+        );
+        const CardContent = ({ children }) => <div>{children}</div>;
+        const CardFooter = ({ children, className }) => (
+            <div className={`mt-4 ${className}`}>{children}</div>
+        );
+        const Button = ({ children, onClick, disabled, className }) => (
+            <button
+                onClick={onClick}
+                disabled={disabled}
+                className={`px-4 py-2 bg-blue-500 text-white rounded ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'} ${className}`}
+            >
+                {children}
+            </button>
+        );
+        const RadioGroup = ({ children, value, onValueChange }) => (
+            <div onChange={(e) => onValueChange(parseInt(e.target.value))}>{children}</div>
+        );
+        const RadioGroupItem = ({ value, id }) => (
+            <input type="radio" value={value} id={id} name="answer" />
+        );
+        const Label = ({ children, htmlFor }) => (
+            <label htmlFor={htmlFor} className="ml-2">{children}</label>
+        );
+        const AlertCircle = () => <span>❌</span>;
+        const CheckCircle2 = () => <span>✅</span>;
+
+        const questions = [
+          {
+            question: "Согласно видео, сказки изначально использовались для:",
+            options: [
+              "Развлечения детей",
+              "Обучения детей моральным урокам",
+              "Подготовки детей к взрослой жизни через ритуальные испытания",
+              "Распространения религиозных убеждений"
+            ],
+            correctAnswer: 2
+          },
+          {
+            question: "В видео утверждается, что по сравнению со сказками, народные сказки:",
+            options: [
+              "Менее жестоки",
+              "Более жестоки",
+              "Одинаково жестоки",
+              "Не содержат насилия"
+            ],
+            correctAnswer: 1
+          },
+          {
+            question: "Какой из следующих примеров насилия НЕ упоминается в видео?",
+            options: [
+              "Убийство мачехи Белоснежки",
+              "Съедение бабушки волком в 'Красной Шапочке'",
+              "Утопление сестры Золушки в крови",
+              "Похищение детей ведьмой в 'Гензель и Гретель'"
+            ],
+            correctAnswer: 2
+          },
+          {
+            question: "Согласно видео, почему видеоигры могут быть лучше для детей, чем сказки?",
+            options: [
+              "Они интерактивны и позволяют детям делать выбор",
+              "Они не содержат насилия",
+              "Они всегда имеют счастливый конец",
+              "Они короче и легче для понимания"
+            ],
+            correctAnswer: 0
+          },
+          {
+            question: "Каков основной посыл видео относительно морального воспитания детей?",
+            options: [
+              "Родители должны полагаться на сказки, чтобы учить своих детей морали",
+              "Родители должны полагаться на видеоигры, чтобы учить своих детей морали",
+              "Родители не должны полагаться ни на сказки, ни на видеоигры, чтобы учить своих детей морали",
+              "Сказки и видеоигры одинаково эффективны в обучении детей морали"
+            ],
+            correctAnswer: 2
+          }
+        ];
+
+        const ExamComponent = () => {
+          const [currentQuestion, setCurrentQuestion] = useState(0);
+          const [selectedAnswers, setSelectedAnswers] = useState(Array(questions.length).fill(null));
+          const [showResults, setShowResults] = useState(false);
+
+          const handleAnswer = (answerIndex) => {
+            const newAnswers = [...selectedAnswers];
+            newAnswers[currentQuestion] = answerIndex;
+            setSelectedAnswers(newAnswers);
+          };
+
+          const nextQuestion = () => {
+            if (currentQuestion < questions.length - 1) {
+              setCurrentQuestion(currentQuestion + 1);
+            } else {
+              setShowResults(true);
+            }
+          };
+
+          const prevQuestion = () => {
+            if (currentQuestion > 0) {
+              setCurrentQuestion(currentQuestion - 1);
+            }
+          };
+
+          const calculateScore = () => {
+            return selectedAnswers.reduce((score, answer, index) => {
+              return answer === questions[index].correctAnswer ? score + 1 : score;
+            }, 0);
+          };
+
+          if (showResults) {
+            const score = calculateScore();
+            return (
+              <Card className="w-full max-w-2xl mx-auto">
+                <CardHeader className="text-2xl font-bold text-center">Результаты экзамена</CardHeader>
+                <CardContent>
+                  <p className="text-xl text-center mb-4">
+                    Вы ответили правильно на {score} из {questions.length} вопросов.
+                  </p>
+                </CardContent>
+              </Card>
+            );
+          }
+
+          return (
+            <Card className="w-full max-w-2xl mx-auto">
+              <CardHeader className="text-2xl font-bold">
+                Экзамен: Сказки против видеоигр
+              </CardHeader>
+              <CardContent>
+                <p className="mb-4">Вопрос {currentQuestion + 1} из {questions.length}</p>
+                <p className="font-semibold mb-4">{questions[currentQuestion].question}</p>
+                <RadioGroup value={selectedAnswers[currentQuestion]} onValueChange={handleAnswer}>
+                  {questions[currentQuestion].options.map((option, index) => (
+                    <div key={index} className="flex items-center space-x-2 mb-2">
+                      <RadioGroupItem value={index} id={`option-${index}`} />
+                      <Label htmlFor={`option-${index}`}>{option}</Label>
+                    </div>
+                  ))}
+                </RadioGroup>
+              </CardContent>
+              <CardFooter className="flex justify-between">
+                <Button onClick={prevQuestion} disabled={currentQuestion === 0}>
+                  Предыдущий
+                </Button>
+                <Button onClick={nextQuestion}>
+                  {currentQuestion === questions.length - 1 ? "Завершить" : "Следующий"}
+                </Button>
+              </CardFooter>
+            </Card>
+          );
+        };
+
+        ReactDOM.render(<ExamComponent />, document.getElementById('root'));
+    </script>
+</body>
+</html>
